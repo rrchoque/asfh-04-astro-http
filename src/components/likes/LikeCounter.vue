@@ -1,5 +1,7 @@
 <template>
-  <button @click="likePost">
+  <div v-if="isLoading">Loading...</div>
+  <button v-else-if="likeCount === 0" @click="likePost">Like this post</button>
+  <button v-else @click="likePost">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="18"
@@ -18,14 +20,48 @@
       ></path>
     </svg>
     Like
-    <span> 0 </span>
+    <span>{{ likeCount }}</span>
   </button>
 </template>
 
 <script lang="ts" setup>
+import { ref } from "vue";
+import confetti from "canvas-confetti";
+
+interface Props {
+  postId: string;
+}
+
+const props = defineProps<Props>();
+//console.log(props.postId);
+const likeCount = ref(0);
+const likeClicks = ref(0);
+const isLoading = ref(true);
+
 const likePost = () => {
-  console.log("Like post +1");
+  likeCount.value += 1;
+
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: {
+      x: Math.random(),
+      y: Math.random() - 0.2,
+    },
+  });
 };
+
+const getCurrentLikes = async () => {
+  const resp = await fetch(`/api/posts/likes/${props.postId}`);
+  if (!resp.ok) return;
+
+  const data = await resp.json();
+
+  likeCount.value = data.likes;
+  isLoading.value = false;
+};
+
+getCurrentLikes();
 </script>
 
 <style scoped>
