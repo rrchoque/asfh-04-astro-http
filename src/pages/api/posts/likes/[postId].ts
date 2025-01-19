@@ -32,7 +32,7 @@ export const GET: APIRoute = async ({ params, request }) => {
 };
 
 export const PUT: APIRoute = async ({ params, request }) => {
-  const postId = params.id ?? "";
+  const postId = params.postId ?? "";
 
   const posts = await db.select().from(Posts).where(eq(Posts.id, postId));
   const { likes = 0 } = await request.json();
@@ -53,5 +53,5 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
   await db.update(Posts).set(post).where(eq(Posts.id, postId));
 
-  return new Response("Ok!", { status: 200 });
+  return new Response(JSON.stringify({ likes: post.likes }), { status: 200 });
 };

@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import confetti from "canvas-confetti";
 
 interface Props {
@@ -38,7 +38,24 @@ const likeCount = ref(0);
 const likeClicks = ref(0);
 const isLoading = ref(true);
 
+watch(likeCount, () => {
+  if (likeClicks.value === 0) {
+    return;
+  }
+
+  fetch(`/api/posts/likes/${props.postId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ likes: likeClicks.value }),
+  });
+
+  likeClicks.value = 0;
+});
+
 const likePost = () => {
+  likeClicks.value += 1;
   likeCount.value += 1;
 
   confetti({
