@@ -53,5 +53,10 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
   await db.update(Posts).set(post).where(eq(Posts.id, postId));
 
-  return new Response(JSON.stringify({ likes: post.likes }), { status: 200 });
+  return new Response(JSON.stringify({ likes: post.likes }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 };

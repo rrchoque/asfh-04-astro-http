@@ -22,11 +22,14 @@
     Like
     <span>{{ likeCount }}</span>
   </button>
+  {{ likeClicks }}
 </template>
 
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 import confetti from "canvas-confetti";
+import debounce from "lodash.debounce";
+import type { RefSymbol } from "@vue/reactivity";
 
 interface Props {
   postId: string;
@@ -38,21 +41,28 @@ const likeCount = ref(0);
 const likeClicks = ref(0);
 const isLoading = ref(true);
 
-watch(likeCount, () => {
-  if (likeClicks.value === 0) {
-    return;
-  }
+watch(
+  likeCount,
+  debounce(async () => {
+    if (likeClicks.value === 0) {
+      return;
+    }
 
-  fetch(`/api/posts/likes/${props.postId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ likes: likeClicks.value }),
-  });
+    const resp = await fetch(`/api/posts/likes/${props.postId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ likes: likeClicks.value }),
+    });
 
-  likeClicks.value = 0;
-});
+    const data = await resp.json();
+
+    console.log(data);
+    likeClicks.value = 0;
+    likeCount.value = data.likes;
+  }, 500)
+);
 
 const likePost = () => {
   likeClicks.value += 1;
