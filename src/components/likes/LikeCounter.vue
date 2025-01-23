@@ -70,7 +70,7 @@ const likePost = async () => {
 
   const { data, error } = await actions.getGreeting({
     age: 39,
-    name: "Fernando",
+    name: "Reynaldo",
     isActive: true,
   });
 
